@@ -1,16 +1,14 @@
 
 #include "randen.h"
+#include "randen_int128.h"
 
 #include <stdint.h>
 #include <string.h>
-#include <wmmintrin.h>
 
-#define INT128 __m128i
 #define FEISTEL_BLOCKS 16
 #define FEISTEL_FUNCTIONS (FEISTEL_BLOCKS / 2)
 #define FEISTEL_ROUNDS (16 + 1)
 #define KEYS (FEISTEL_ROUNDS * FEISTEL_FUNCTIONS)
-#define LANES (16 / 8)
 #define CAPACITY_BYTES 16
 #define STATE_BYTES 256
 #define RATE_BYTES (STATE_BYTES - CAPACITY_BYTES)
@@ -18,26 +16,6 @@
 #if !(defined(__clang__) || defined(__GNUC__)) && !defined(__restrict__)
 # define __restrict__
 #endif
-
-static inline INT128
-load(const uint64_t *__restrict__ lanes, const int block)
-{
-    const uint64_t *__restrict__ from = lanes + block * LANES;
-    return _mm_load_si128((const INT128 *) from);
-}
-
-static inline void
-store(const INT128 v, uint64_t *__restrict__ lanes, const int block)
-{
-    uint64_t *__restrict__ to = lanes + block * LANES;
-    return _mm_store_si128((INT128 *) to, v);
-}
-
-static inline INT128
-aes(const INT128 state, const INT128 round_key)
-{
-    return _mm_aesenc_si128(state, round_key);
-}
 
 static const uint64_t CRYPTO_ALIGN(32) ROUND_KEYS[KEYS * LANES] = {
     0x243F6A8885A308D3ULL, 0x13198A2E03707344ULL, 0xA4093822299F31D0ULL,
@@ -143,7 +121,7 @@ block_shuffle(uint64_t *__restrict__ state)
 
     memcpy(source, state, sizeof source);
     for (branch = 0; branch < FEISTEL_BLOCKS; branch++) {
-        const INT128 v = load(source, shuffle[branch]);
+        const int128 v = load(source, shuffle[branch]);
         store(v, state, branch);
     }
 }
@@ -160,10 +138,10 @@ permute(uint64_t *__restrict__ state)
 #endif
     for (round = 0; round < FEISTEL_ROUNDS; round++) {
         for (branch = 0; branch < FEISTEL_BLOCKS; branch += 2) {
-            const INT128 even = load(state, branch);
-            const INT128 odd  = load(state, branch + 1);
-            const INT128 f1   = aes(even, load(keys, 0));
-            const INT128 f2   = aes(f1, odd);
+            const int128 even = load(state, branch);
+            const int128 odd  = load(state, branch + 1);
+            const int128 f1   = aes(even, load(keys, 0));
+            const int128 f2   = aes(f1, odd);
             keys += LANES;
             store(f2, state, branch + 1);
         }
@@ -176,11 +154,11 @@ absorb(const void *seed_void, void *state_void)
 {
     const uint64_t *__restrict__ seed = (uint64_t *) seed_void;
     uint64_t *__restrict__ state      = (uint64_t *) state_void;
-    const int capacity_blocks         = CAPACITY_BYTES / sizeof(INT128);
+    const int capacity_blocks         = CAPACITY_BYTES / sizeof(int128);
     int       i;
 
-    for (i = capacity_blocks; i < STATE_BYTES / (int) sizeof(INT128); i++) {
-        INT128 block = load(state, i);
+    for (i = capacity_blocks; i < STATE_BYTES / (int) sizeof(int128); i++) {
+        int128 block = load(state, i);
         block ^= load(seed, i - capacity_blocks);
         store(block, state, i);
     }
@@ -190,8 +168,8 @@ static void
 generate(void *state_void)
 {
     uint64_t *__restrict__ state = (uint64_t *) state_void;
-    INT128 prev_inner            = load(state, 0);
-    INT128 inner;
+    int128 prev_inner            = load(state, 0);
+    int128 inner;
 
     permute(state);
     inner = load(state, 0);
