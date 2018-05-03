@@ -1,5 +1,5 @@
-#ifndef randen_int128_H
-#define randen_int128_H
+#ifndef randen_vector128_H
+#define randen_vector128_H
 
 #include <wmmintrin.h>
 

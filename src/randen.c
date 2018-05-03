@@ -1,6 +1,6 @@
 
 #include "randen.h"
-#include "randen_int128.h"
+#include "randen_vector128.h"
 
 #include <stdint.h>
 #include <string.h>
