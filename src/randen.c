@@ -1,6 +1,5 @@
 
 #include "randen.h"
-#include "randen_vector128.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -17,7 +16,8 @@
 # define __restrict__
 #endif
 
-#include "randen_round_keys.h"
+#include "private/randen_vector128.h"
+#include "private/randen_round_keys.h"
 
 static inline void
 block_shuffle(uint64_t *__restrict__ state)
