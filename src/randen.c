@@ -206,3 +206,13 @@ randen_generate_byte(RandenState *st)
 
     return ret;
 }
+
+void
+randen_generate(RandenState *st, uint8_t *out, size_t len)
+{
+    size_t i;
+
+    for (i = 0; i < len; i++) {
+        out[i] = randen_generate_byte(st);
+    }
+}

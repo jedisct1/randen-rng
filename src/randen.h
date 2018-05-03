@@ -22,5 +22,6 @@ typedef struct RandenState_ {
 void    randen_init(RandenState *st, const uint8_t seed[RANDEN_SEED_BYTES]);
 void    randen_reseed(RandenState *st, const uint8_t seed[RANDEN_SEED_BYTES]);
 uint8_t randen_generate_byte(RandenState *st);
+void    randen_generate(RandenState *st, uint8_t *out, size_t len);
 
 #endif
