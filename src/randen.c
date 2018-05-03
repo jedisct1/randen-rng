@@ -2,7 +2,6 @@
 #include "randen.h"
 
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #include <wmmintrin.h>
 
