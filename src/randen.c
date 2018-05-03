@@ -22,7 +22,6 @@ static inline __m128i
 load(const uint64_t *__restrict__ lanes, const int block)
 {
     const uint64_t *__restrict__ from = lanes + block * LANES;
-
     return _mm_load_si128((const __m128i *) from);
 }
 
@@ -30,7 +29,6 @@ static inline void
 store(const __m128i v, uint64_t *__restrict__ lanes, const int block)
 {
     uint64_t *__restrict__ to = lanes + block * LANES;
-
     return _mm_store_si128((__m128i *) to, v);
 }
 
