@@ -1,6 +1,7 @@
 #ifndef randen_H
 #define randen_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define RANDEN_STATE_BYTES 256
